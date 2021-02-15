@@ -1,1 +1,2 @@
-# gameloop
+# Game loop js
+Using requestAnimationFrame
