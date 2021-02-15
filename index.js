@@ -30,10 +30,10 @@ class Loop {
         requestAnimationFrame(this.animate);
 
         // Set delta
-        this.delta = currentTime - this.lastUpdate;
+        this.deltaTime = currentTime - this.lastUpdate;
 
         // Prevent redrawing when tab is incative(if it is invisible longer than 40ms)
-        if(this.delta < this.maxInterval) {
+        if(this.deltaTime < this.maxInterval) {
             // Put time in seconds to the update function.
             this.update(this.deltaTime / 1000);
 
@@ -69,7 +69,7 @@ class Layer {
 
 class App {
     constructor(container) {
-        const layer = new Layer(container);
+        this.layer = new Layer(container);
 
         this.rect = {
             x: 0,
@@ -80,6 +80,32 @@ class App {
             vy: 500,
             color: "orange"
         };
+
+        new Loop(this.update.bind(this), this.display.bind(this));
+    }
+
+    update(correction) {
+        // If hot the wall - change the direction
+        if (this.rect.x <= 0 && this.rect.vx < 0 || this.rect.x + this.rect.w > this.layer.w && this.rect.vx > 0) {
+            this.rect.vx = -this.rect.vx;
+        }
+        if (this.rect.y <= 0 && this.rect.vy < 0 || this.rect.y + this.rect.h > this.layer.h && this.rect.vy > 0) {
+            this.rect.vy = -this.rect.vy;
+        }
+
+        // Update position of the rect.
+        // Correction - to make animation more of less equal on the different refresh rates
+        this.rect.x += this.rect.vx * correction;
+        this.rect.y += this.rect.vy * correction;
+    }
+
+    display(dt) {
+        this.layer.context.clearRect(0, 0, this.layer.w, this.layer.h);
+        this.layer.context.fillStyle = this.rect.color;
+        this.layer.context.fillRect(this.rect.x, this.rect.y, this.rect.w, this.rect.h); 
+    
+        this.layer.context.font = `40px Arial black`;
+        this.layer.context.fillText(dt, 30, 60);
     }
 }
 
